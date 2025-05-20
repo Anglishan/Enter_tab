@@ -44,4 +44,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: site-url
-          path: site_url.tx
+          path: site_url.txt
