@@ -1,0 +1,47 @@
+name: Deploy static site to GitHub Pages
+
+# Запускаем сборку при пуше в main или вручную через интерфейс GitHub
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Забираем текущую версию репозитория
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Настраиваем Pages-бэкенд (указывает GitHub, что в этом проекте будет Pages)
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v3
+
+      # Загружаем ваши статические файлы (весь содержимый репозитория) в артефакт, чтобы Pages мог развернуть
+      - name: Upload artifact for Pages
+        uses: actions/upload-pages-artifact@v1
+        with:
+          # Здесь путь до статического сайта. 
+          # Если у вас весь HTML/CSS/JS лежит в корне проекта, то указываем "."
+          path: .
+
+      # Деплоим загруженный артефакт на GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v1
+
+      # После деплоя создаём текстовый файл с окончательным URL вашего сайта
+      - name: Generate site URL file
+        run: |
+          # При условии, что сайт будет доступен по адресу:
+          # https://<GitHub-пользователь>.github.io/<имя-репозитория>/
+          echo "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" > site_url.txt
+
+      # Загружаем файл site_url.txt в артефакты сборки
+      - name: Upload site_url.txt as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: site-url
+          path: site_url.tx
